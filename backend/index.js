@@ -9,9 +9,6 @@ app.use(cors());
 app.use(express.json());
 
 const db = require("./dataBase/db.js");
-const { generateToken } = require("./middleware/token.js");
-const { requireAuth } = require("./middleware/authMiddleware.js");
-const { requireNonce } = require("./middleware/nonce.js");
 
 db.execute("SELECT 1")
   .then(() => console.log("Connexion MySQL OK"))

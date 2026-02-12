@@ -1,4 +1,4 @@
-// middleware/authMiddleware.js
+// middleware/authMiddleware.js (fix MySQL)
 const db = require("../dataBase/db.js");
 const { verifyToken } = require("./token.js");
 
@@ -19,11 +19,13 @@ async function requireAuth(req, res, next) {
     const userMail = verification.token.user;
 
     const [rows] = await db.execute(
-      `SELECT id, mail FROM utilisateurs WHERE mail = ? LIMIT 1`,
+      `SELECT Id_USER, email, twitch_url, created_at
+       FROM USER_
+       WHERE email = ? LIMIT 1`,
       [userMail]
     );
 
-    req.user = rows.length ? rows[0] : { mail: userMail };
+    req.user = rows.length ? rows[0] : { email: userMail };
     return next();
   } catch (err) {
     console.error("requireAuth error:", err);

@@ -1,1 +1,38 @@
-<p>login works!</p>
+<div class="page">
+  <div class="card">
+    <h1>Connexion</h1>
+    <p class="subtitle">Connecte-toi pour accéder à ton planner</p>
+
+    <form (ngSubmit)="submit()" [formGroup]="form" novalidate>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="ex: nom@domaine.com" autocomplete="email" />
+        <small class="error" *ngIf="email?.touched && email?.invalid">
+          <span *ngIf="email?.errors?.['required']">Email obligatoire.</span>
+          <span *ngIf="email?.errors?.['email']">Format d’email invalide.</span>
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+        <small class="error" *ngIf="password?.touched && password?.invalid">
+          <span *ngIf="password?.errors?.['required']">Mot de passe obligatoire.</span>
+          <span *ngIf="password?.errors?.['minlength']">Minimum 8 caractères.</span>
+        </small>
+      </div>
+
+      <div class="errorBox" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <button class="btn" type="submit" [disabled]="loading">
+        <span *ngIf="!loading">Se connecter</span>
+        <span *ngIf="loading">Connexion...</span>
+      </button>
+    </form>
+
+    <div class="footer">
+      <span>Pas encore de compte ?</span>
+      <a routerLink="/register">Créer un compte</a>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,8 @@
+const { generateToken } = require("../middleware/token.js");
+const { requireAuth } = require("../middleware/authMiddleware.js");
+const { requireNonce } = require("../middleware/nonce.js");
+
+
 // Récupérer le sel
 app.post("/getsalt", async (req, res) => {
   try {
@@ -39,32 +44,6 @@ app.post("/completeRegister", requireNonce, async (req, res) => {
   }
 });
 
-app.post("/login", requireNonce, async (req, res) => {
-  try {
-    const { mail, password } = req.body;
-
-    const [rows] = await db.execute(
-      `SELECT mail, pass FROM utilisateurs WHERE mail = ? LIMIT 1`,
-      [mail]
-    );
-
-    if (!rows.length || rows[0].pass !== password) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const token = await generateToken(mail, req);
-
-    return res.status(200).json({
-      message: "Login successful",
-      mail,
-      token: token.id, // on renvoie juste l'id (comme Bearer)
-      tokenObject: token, // optionnel: si tu veux debug
-    });
-  } catch (err) {
-    console.error("/login error:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
 
 // Exemple route protégée
 app.get("/me", requireAuth, (req, res) => {

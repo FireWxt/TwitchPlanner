@@ -41,7 +41,7 @@ async function generateToken(userMail, req) {
   token.signature = buildSignature(token);
 
   await db.execute(
-    `INSERT INTO tokens (id, user_mail, created_at, expire_at, device_fingerprint, active, signature)
+    `INSERT INTO tokens (id, user_email, created_at, expire_at, device_fingerprint, active, signature)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       token.id,
@@ -53,7 +53,7 @@ async function generateToken(userMail, req) {
       token.signature,
     ]
   );
-
+  
   return token;
 }
 
@@ -61,7 +61,7 @@ async function verifyToken(tokenId, req) {
   if (!tokenId) return { valid: false, error: "Token manquant" };
 
   const [rows] = await db.execute(
-    `SELECT id, user_mail, created_at, expire_at, device_fingerprint, active, signature
+    `SELECT id, user_email, created_at, expire_at, device_fingerprint, active, signature
      FROM tokens
      WHERE id = ? LIMIT 1`,
     [tokenId]

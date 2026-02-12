@@ -2,6 +2,10 @@ const express = require("express");
 const crypto = require("crypto");
 const db = require("../dataBase/db");
 
+const { generateToken } = require("../middleware/token.js");
+const { requireAuth } = require("../middleware/authMiddleware.js");
+const { requireNonce } = require("../middleware/nonce.js");
+
 const router = express.Router();
 
 // Validation email simple
@@ -68,5 +72,55 @@ router.post("/register", async (req, res) => {
     return res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: "Email invalide" });
+    }
+    if (typeof password !== "string" || password.length === 0) {
+      return res.status(400).json({ error: "Mot de passe manquant" });
+    }
+
+    const [rows] = await db.execute(
+      `SELECT Id_USER, email, password, salt, twitch_url, created_at
+       FROM USER_
+       WHERE email = ? LIMIT 1`,
+      [email]
+    );
+
+    if (!rows.length) {
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+
+    const user = rows[0];
+    const candidateHash = hashPassword(password, user.salt);
+
+    if (candidateHash !== user.password) {
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+
+    const token = await generateToken(user.email, req);
+
+    return res.status(200).json({
+      message: "Login successful",
+      token: token.id,
+      user: {
+        id: user.Id_USER,
+        email: user.email,
+        twitch_url: user.twitch_url,
+        created_at: user.created_at,
+      },
+      expireAt: token.expire_at,
+    });
+  } catch (err) {
+    console.error("LOGIN error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 
 module.exports = router;
