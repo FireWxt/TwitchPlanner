@@ -1,0 +1,72 @@
+const express = require("express");
+const crypto = require("crypto");
+const db = require("../dataBase/db");
+
+const router = express.Router();
+
+// Validation email simple
+function isValidEmail(email) {
+  return typeof email === "string" &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Générer un salt sécurisé
+function generateSalt() {
+  return crypto.randomBytes(32).toString("hex"); // 64 chars
+}
+
+// Hash password + salt
+function hashPassword(password, salt) {
+  return crypto
+    .createHash("sha256")
+    .update(password + salt)
+    .digest("hex");
+}
+
+router.post("/register", async (req, res) => {
+  try {
+    const { email, password, twitch_url } = req.body;
+
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: "Email invalide" });
+    }
+
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({ error: "Mot de passe trop court (min 8 caractères)" });
+    }
+
+    const [existing] = await db.execute(
+      "SELECT Id_USER FROM USER_ WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ error: "Email déjà utilisé" });
+    }
+
+
+    const salt = generateSalt();
+
+
+    const passwordHash = hashPassword(password, salt);
+
+    const [result] = await db.execute(
+      `INSERT INTO USER_ (email, password, salt, twitch_url, created_at)
+       VALUES (?, ?, ?, ?, NOW())`,
+      [email, passwordHash, salt, twitch_url || null]
+    );
+
+    return res.status(201).json({
+      message: "Utilisateur créé avec succès",
+      userId: result.insertId,
+      email
+    });
+
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+module.exports = router;

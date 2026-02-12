@@ -1,0 +1,40 @@
+<div class="container mt-5">
+  <h2>Créer un compte</h2>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+    <!-- Email -->
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" class="form-control" formControlName="email">
+      <small *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+        Email invalide
+      </small>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+      <label>Mot de passe</label>
+      <input type="password" class="form-control" formControlName="password">
+      <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+        Minimum 8 caractères
+      </small>
+    </div>
+
+    <!-- Twitch URL -->
+    <div class="mb-3">
+      <label>URL chaîne Twitch</label>
+      <input type="text" class="form-control" formControlName="twitch_url">
+    </div>
+
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="loading">
+      {{ loading ? 'Inscription...' : 'S’inscrire' }}
+    </button>
+
+  </form>
+</div>
