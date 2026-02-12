@@ -1,0 +1,61 @@
+<h2>Planning</h2>
+
+<div *ngIf="loading">Chargement...</div>
+<div *ngIf="error" style="color:red; margin: 8px 0;">{{ error }}</div>
+
+<!-- Planning actif -->
+<div *ngIf="planning; else noPlanning">
+  <h3>Planning actif</h3>
+  <p><b>Titre:</b> {{ planning.title }}</p>
+  <p><b>Début:</b> {{ planning.start_date | date:'short' }}</p>
+  <p><b>Fin:</b> {{ planning.end_date | date:'short' }}</p>
+
+  <button (click)="deletePlanning()">Supprimer ce planning</button>
+
+  <hr />
+
+  <h3>Ajouter un événement</h3>
+  <div>
+    <input placeholder="Titre du stream" [(ngModel)]="eventForm.stream_title" />
+  </div>
+  <div>
+    <input type="date" [(ngModel)]="eventForm.day_of_week" />
+  </div>
+  <div>
+    <input type="time" [(ngModel)]="eventForm.start_time" />
+  </div>
+  <div>
+    <input type="time" [(ngModel)]="eventForm.end_time" />
+  </div>
+
+  <button (click)="addEvenement()">Ajouter</button>
+
+  <hr />
+
+  <h3>Événements</h3>
+  <div *ngIf="evenements.length === 0">Aucun événement.</div>
+
+  <div *ngFor="let e of evenements" style="border:1px solid #ddd; padding:10px; margin:8px 0;">
+    <div><b>{{ e.stream_title }}</b></div>
+    <div>{{ e.day_of_week | date:'shortDate' }} — {{ e.start_time }} → {{ e.end_time }}</div>
+    <button (click)="deleteEvenement(e.id_evenement)">Supprimer</button>
+  </div>
+</div>
+
+<ng-template #noPlanning>
+  <h3>Créer un planning</h3>
+
+  <div>
+    <input placeholder="Titre" [(ngModel)]="planningForm.title" />
+  </div>
+  <div>
+    <label>Start date</label><br />
+    <input type="datetime-local" [(ngModel)]="planningForm.start_date" />
+  </div>
+  <div>
+    <label>End date (optionnel)</label><br />
+    <input type="datetime-local" [(ngModel)]="planningForm.end_date" />
+  </div>
+
+  <button (click)="createPlanning()">Créer</button>
+</ng-template>

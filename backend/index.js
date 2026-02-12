@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const cors = require("cors");
 const authRoutes = require("./api/auth.js");
 const app = express();
+const planningRoutes = require("./api/planning.js");
 
 app.use(cors());
 app.use(express.json());
@@ -16,6 +17,8 @@ db.execute("SELECT 1")
 
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/planning", planningRoutes);
 
 app.listen(3000, () => {
   console.log("http://localhost:3000/");

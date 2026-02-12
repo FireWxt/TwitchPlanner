@@ -33,11 +33,11 @@ router.post("/register", async (req, res) => {
 
 
     if (!isValidEmail(email)) {
-      return res.status(400).json({ error: "Email invalide" });
+      return res.status(400).json({ error: "Invalid Credentials" });
     }
 
     if (typeof password !== "string" || password.length < 8) {
-      return res.status(400).json({ error: "Mot de passe trop court (min 8 caractères)" });
+      return res.status(400).json({ error: "Invalid Credentials" });
     }
 
     const [existing] = await db.execute(
@@ -46,7 +46,7 @@ router.post("/register", async (req, res) => {
     );
 
     if (existing.length > 0) {
-      return res.status(409).json({ error: "Email déjà utilisé" });
+      return res.status(409).json({ error: "Invalid Credentials" });
     }
 
 
@@ -76,6 +76,9 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log("LOGIN req.body:", req.body);
+    console.log("EMAIL reçu:", email, "| type:", typeof email);
 
     if (!isValidEmail(email)) {
       return res.status(400).json({ error: "Email invalide" });

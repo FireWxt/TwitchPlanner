@@ -45,9 +45,8 @@ export class Login {
     this.auth.login(email!, password!).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
         this.loading = false;
-        this.router.navigateByUrl('/');
+        this.router.navigateByUrl('/planning');
       },
       error: (err) => {
         this.loading = false;
