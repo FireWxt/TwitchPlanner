@@ -33,4 +33,8 @@ export class PlanningService {
   deletePlanning(planningId: number) {
     return this.http.delete(`${this.API}/${planningId}`);
   }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 }

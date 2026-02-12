@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../dataBase/db.js");
 const { requireAuth } = require("../middleware/authMiddleware.js");
+const { requireNonce } = require("../middleware/nonce.js");
 
 
 async function getActivePlanningForUser(userId) {
