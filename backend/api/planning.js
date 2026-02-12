@@ -97,7 +97,42 @@ router.get("/me", requireAuth, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/planning/:id
+ * Récupère un planning par id (uniquement si c’est celui du user)
+ */
+router.get("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.Id_USER;
+    if (!userId) return res.status(500).json({ error: "Utilisateur non chargé (requireAuth)" });
 
+    const planningId = Number(req.params.id);
+    if (!Number.isFinite(planningId)) return res.status(400).json({ error: "Id invalide" });
+
+    const [pRows] = await db.execute(
+      `SELECT *
+       FROM Planning
+       WHERE Id_Planning = ? AND user_id = ?
+       LIMIT 1`,
+      [planningId, userId]
+    );
+
+    if (!pRows.length) return res.status(404).json({ error: "Planning introuvable" });
+
+    const [events] = await db.execute(
+      `SELECT *
+       FROM evenement
+       WHERE planning_id = ?
+       ORDER BY day_of_week ASC, start_time ASC`,
+      [planningId]
+    );
+
+    return res.json({ planning: pRows[0], evenements: events });
+  } catch (err) {
+    console.error("Get planning by id error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 
