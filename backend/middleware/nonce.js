@@ -6,6 +6,7 @@ function requireNonce(req, res, next) {
         console.log("Nonce", nonce);
         return res.status(403).json({ error: 'Invalid nonce' });
     }
+    return next();
 }
 
 
