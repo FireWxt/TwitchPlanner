@@ -134,6 +134,49 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/planning/:id
+ * Supprime un planning (et reset USER_.Id_Planning si c'était le planning actif)
+ * (ON DELETE CASCADE gérera la suppression des événements si la FK est en cascade côté evenement->Planning.
+ *  Si pas de cascade, il faut delete les événements avant.)
+ */
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.Id_USER;
+    if (!userId) return res.status(500).json({ error: "Utilisateur non chargé (requireAuth)" });
+
+    const planningId = Number(req.params.id);
+    if (!Number.isFinite(planningId)) return res.status(400).json({ error: "Id invalide" });
+
+    const [pRows] = await db.execute(
+      `SELECT Id_Planning
+       FROM Planning
+       WHERE Id_Planning = ? AND user_id = ?
+       LIMIT 1`,
+      [planningId, userId]
+    );
+    if (!pRows.length) return res.status(404).json({ error: "Planning introuvable" });
+
+
+    await db.execute(
+      `UPDATE USER_
+       SET Id_Planning = NULL
+       WHERE Id_USER = ? AND Id_Planning = ?`,
+      [userId, planningId]
+    );
+
+    await db.execute(`DELETE FROM evenement WHERE planning_id = ?`, [planningId]);
+
+
+    await db.execute(`DELETE FROM Planning WHERE Id_Planning = ?`, [planningId]);
+
+    return res.json({ message: "Planning supprimé" });
+  } catch (err) {
+    console.error("Delete planning error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 
 
