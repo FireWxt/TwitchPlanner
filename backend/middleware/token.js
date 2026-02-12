@@ -26,11 +26,11 @@ function buildSignature(token) {
     .digest("hex");
 }
 
-async function generateToken(userMail, req) {
+async function generateToken(user_Mail, req) {
   const now = Date.now();
   const token = {
     id: crypto.randomBytes(16).toString("hex"),
-    user_mail: userMail,
+    user_mail: user_Mail,
     created_at: now,
     expire_at: now + 30 * 24 * 3600 * 1000, // 30 jours
     device_fingerprint: generateDeviceFingerPrint(req),
