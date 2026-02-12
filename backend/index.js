@@ -7,9 +7,13 @@ app.use(express.json());
 const { setTokensReference, generateToken } = require('./middleware/token.js');
 const { setUsersReference, requireAuth } = require('./middleware/authMiddleware.js');
 const { requireNonce } = require('./middleware/nonce.js');
-const { run } = require('./dataBase/dbconnect.js');
 
-run().catch(console.dir);
+const db = require("./dataBase/db.js");
+
+db.query("SELECT 1")
+  .then(() => console.log("Connexion MySQL OK"))
+  .catch(err => console.error("Erreur DB:", err));
+
 
 let users = [];
 let tokens = [];
@@ -67,3 +71,4 @@ app.post('/completeRegister', requireNonce,(req, res) => {
 app.listen(3000, () => {
     console.log('http://localhost:3000/');
 });
+
