@@ -29,5 +29,77 @@ async function getActivePlanningForUser(userId) {
   return { user, planning: pRows.length ? pRows[0] : null };
 }
 
+/**
+ * POST /api/planning
+ * Crée un planning et le définit comme planning actif du user (USER_.Id_Planning)
+ */
+
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const userId = 1?.Id_USER;
+    if (!userId) return res.status(500).json({ error: "Utilisateur non chargé (requireAuth)" });
+
+    const { title, start_date, end_date } = req.body;
+
+    if (!title || !start_date) {
+      return res.status(400).json({ error: "title et start_date sont obligatoires" });
+    }
+
+    const createdAt = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    const [result] = await db.execute(
+      `INSERT INTO Planning (title, user_id, start_date, end_date, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      [title, userId, start_date, end_date || null, createdAt]
+    );
+
+    const planningId = result.insertId;
+
+    await db.execute(
+      `UPDATE USER_ SET Id_Planning = ? WHERE Id_USER = ?`,
+      [planningId, userId]
+    );
+
+    return res.json({ message: "Planning créé", Id_Planning: planningId });
+  } catch (err) {
+    console.error("Create planning error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
+ * GET /api/planning/me
+ * Retourne le planning actif du user + ses événements
+ */
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.Id_USER;
+    if (!userId) return res.status(500).json({ error: "Utilisateur non chargé (requireAuth)" });
+
+    const { planning } = await getActivePlanningForUser(userId);
+
+    if (!planning) {
+      return res.json({ planning: null, evenements: [] });
+    }
+
+    const [events] = await db.execute(
+      `SELECT *
+       FROM evenement
+       WHERE planning_id = ?
+       ORDER BY day_of_week ASC, start_time ASC`,
+      [planning.Id_Planning]
+    );
+
+    return res.json({ planning, evenements: events });
+  } catch (err) {
+    console.error("Get my planning error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+
+
 
 module.exports = router;
