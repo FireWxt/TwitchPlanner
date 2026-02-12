@@ -17,7 +17,7 @@ function buildSignature(token) {
     .createHash("sha256")
     .update(
       token.id +
-        token.user_mail +
+        token.user_email +
         token.created_at.toString() +
         token.expire_at.toString() +
         token.device_fingerprint +
@@ -26,11 +26,13 @@ function buildSignature(token) {
     .digest("hex");
 }
 
-async function generateToken(user_Mail, req) {
+async function generateToken(userEmail, req) {
+  if (!userEmail) throw new Error("generateToken: userEmail manquant");
+
   const now = Date.now();
   const token = {
     id: crypto.randomBytes(16).toString("hex"),
-    user_mail: user_Mail,
+    user_email: userEmail,
     created_at: now,
     expire_at: now + 30 * 24 * 3600 * 1000, // 30 jours
     device_fingerprint: generateDeviceFingerPrint(req),
@@ -41,19 +43,19 @@ async function generateToken(user_Mail, req) {
   token.signature = buildSignature(token);
 
   await db.execute(
-    `INSERT INTO tokens (id, user_email, created_at, expire_at, device_fingerprint, active, signature)
+    `INSERT INTO tokens (id, created_at, user_email, expire_at, device_fingerprint, active, signature)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       token.id,
-      token.user_mail,
       token.created_at,
+      token.user_email,
       token.expire_at,
       token.device_fingerprint,
       token.active,
       token.signature,
     ]
   );
-  
+
   return token;
 }
 
@@ -61,7 +63,7 @@ async function verifyToken(tokenId, req) {
   if (!tokenId) return { valid: false, error: "Token manquant" };
 
   const [rows] = await db.execute(
-    `SELECT id, user_email, created_at, expire_at, device_fingerprint, active, signature
+    `SELECT id, created_at, user_email, expire_at, device_fingerprint, active, signature
      FROM tokens
      WHERE id = ? LIMIT 1`,
     [tokenId]
@@ -73,11 +75,11 @@ async function verifyToken(tokenId, req) {
 
   if (!tok.active) return { valid: false, error: "Token inactif" };
   if (Number(tok.expire_at) < Date.now()) return { valid: false, error: "Token expiré" };
+  if (!tok.user_email) return { valid: false, error: "Invalid token: no user email" };
 
-  // Recalcul signature
   const recalculated = buildSignature({
     id: tok.id,
-    user_mail: tok.user_mail,
+    user_email: tok.user_email,
     created_at: Number(tok.created_at),
     expire_at: Number(tok.expire_at),
     device_fingerprint: tok.device_fingerprint,
@@ -88,7 +90,6 @@ async function verifyToken(tokenId, req) {
     return { valid: false, error: "Signature incorrecte" };
   }
 
-  // Vérifier empreinte device
   const currentFingerprint = generateDeviceFingerPrint(req);
   if (currentFingerprint !== tok.device_fingerprint) {
     return { valid: false, error: "Appareil non reconnu" };
@@ -98,7 +99,7 @@ async function verifyToken(tokenId, req) {
     valid: true,
     token: {
       id: tok.id,
-      user: tok.user_mail,
+      user: tok.user_email, // ✅ important: requireAuth attend verification.token.user
       createdAt: Number(tok.created_at),
       expireAt: Number(tok.expire_at),
     },

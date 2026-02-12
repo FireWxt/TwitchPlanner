@@ -37,7 +37,7 @@ async function getActivePlanningForUser(userId) {
 
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const userId = 1?.Id_USER;
+    const userId = req.user?.id ?? req.user?.Id_USER;
     if (!userId) return res.status(500).json({ error: "Utilisateur non chargé (requireAuth)" });
 
     const { title, start_date, end_date } = req.body;
