@@ -19,10 +19,11 @@ export class PlanningService {
 
   addEvenement(planningId: number, payload: {
     stream_title: string;
-    day_of_week: string; // YYYY-MM-DD
-    start_time: string;  // HH:mm:ss ou HH:mm
+    day_of_week: number; 
+    start_time: string;  
     end_time?: string | null;
   }) {
+    console.log("Jour de la semaine ", payload.day_of_week);
     return this.http.post(`${this.API}/${planningId}/evenement`, payload);
   }
 

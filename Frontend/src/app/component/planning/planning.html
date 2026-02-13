@@ -1,59 +1,76 @@
-<div class="page">
-
-  <!-- Header -->
-  <div class="header" *ngIf="planning">
-    <div class="title">
-      <div class="h1">Planning de stream</div>
-      <div class="range">{{ planning.start_date }} <span *ngIf="planning.end_date">→ {{ planning.end_date }}</span></div>
-    </div>
-
-    <div class="profile">
-      <div class="logo">Logo</div>
-      <div class="avatar">👤</div>
+<!-- HEADER -->
+<div class="planningHeader" *ngIf="planning">
+  <div class="left">
+    <div class="title">Planning de stream</div>
+    <div class="range">
+      {{ formatPlanningRange(planning.start_date, planning.end_date) }}
     </div>
   </div>
 
-  <!-- Si pas de planning -->
-  <div *ngIf="!planning && !loading" class="empty">
-    <h2>Crée ton planning</h2>
-    <!-- ton form createPlanning ici -->
+  <div class="right">
+    <div class="logo">Logo</div>
+    <div class="avatar">👤</div>
   </div>
+</div>
 
-  <!-- Grille semaine -->
-  <div *ngIf="planning" class="week">
-    <div class="dayCol" *ngFor="let d of days">
-      <div class="dayHeader">{{ d.label }}</div>
+<!-- SI PAS DE PLANNING -->
+<div *ngIf="!planning && !loading" class="empty">
+  <h2>Créer un planning</h2>
 
-      <button class="addBtn" (click)="openAddEvent(d.key)">+</button>
+  <label>Titre</label>
+  <input [(ngModel)]="planningForm.title" />
 
-      <div class="eventCard" *ngFor="let ev of eventsByDay[d.key]">
-        <div class="time">{{ ev.start_time }}</div>
-        <div class="name">{{ ev.stream_title }}</div>
+  <label>Début</label>
+  <input type="date" [(ngModel)]="planningForm.start_date" [min]="minStartDate" />
 
-        <button class="trash" (click)="deleteEvenement(ev.Id_Evenement || ev.id)">🗑</button>
-      </div>
+
+
+  <button (click)="createPlanning()">Créer</button>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+</div>
+
+<!-- GRILLE (Lun→Dim) -->
+<div class="weekGrid" *ngIf="planning">
+  <div class="dayCol" *ngFor="let d of days">
+
+    <div class="dayHeader">{{ d.label }}</div>
+
+    <button class="addSlot" (click)="openAddEvent(d.value)">+</button>
+
+    <!-- events -->
+    <div class="eventCard" *ngFor="let ev of getEventsForDay(d.value)">
+      <div class="time">{{ ev.start_time }}</div>
+      <div class="name">{{ ev.stream_title }}</div>
+
+      <button class="trash" (click)="deleteEvenement(getEventId(ev))">🗑</button>
+    </div>
+
+    <!-- OFF si aucun event -->
+    <div class="off" *ngIf="getEventsForDay(d.value).length === 0">
+      OFF
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL AJOUT EVENT -->
+<div class="modalBackdrop" *ngIf="showEventForm">
+  <div class="modal">
+    <h3>Ajouter un créneau</h3>
+
+    <label>Titre</label>
+    <input [(ngModel)]="eventForm.stream_title" />
+
+    <label>Heure début</label>
+    <input type="time" [(ngModel)]="eventForm.start_time" />
+
+    <label>Heure fin</label>
+    <input type="time" [(ngModel)]="eventForm.end_time" />
+
+    <div class="actions">
+      <button (click)="addEvenement()">Ajouter</button>
+      <button (click)="closeAddEvent()">Annuler</button>
     </div>
   </div>
-
-  <!-- Form event (modal simple) -->
-  <div class="modalBackdrop" *ngIf="showEventForm">
-    <div class="modal">
-      <h3>Ajouter un événement ({{ eventForm.day_of_week }})</h3>
-
-      <label>Titre</label>
-      <input [(ngModel)]="eventForm.stream_title" />
-
-      <label>Heure début</label>
-      <input type="time" [(ngModel)]="eventForm.start_time" />
-
-      <label>Heure fin</label>
-      <input type="time" [(ngModel)]="eventForm.end_time" />
-
-      <div class="actions">
-        <button (click)="addEvenement()">Ajouter</button>
-        <button (click)="closeAddEvent()">Annuler</button>
-      </div>
-    </div>
-  </div>
-
 </div>
