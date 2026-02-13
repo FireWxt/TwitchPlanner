@@ -5,6 +5,9 @@ const cors = require("cors");
 const authRoutes = require("./api/auth.js");
 const app = express();
 const planningRoutes = require("./api/planning.js");
+const profileRoutes = require("./api/profile.js");
+const path = require("path");
+
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +22,10 @@ db.execute("SELECT 1")
 app.use("/api/auth", authRoutes);
 
 app.use("/api/planning", planningRoutes);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use("/api/profile", profileRoutes);
 
 app.listen(3000, () => {
   console.log("http://localhost:3000/");
