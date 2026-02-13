@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require("../dataBase/db.js");
 const { requireAuth } = require("../middleware/authMiddleware.js");
 const { requireNonce } = require("../middleware/nonce.js");
+const { sanitize } = require("../utils/sanitize.js");
 
 function toYMD(d) {
   const yyyy = d.getFullYear();
@@ -98,7 +99,12 @@ router.put("/evenement/:eventId", requireAuth, async (req, res) => {
 
     const { stream_title, day_of_week, start_time, end_time, game_name, game_cover_url } = req.body;
 
-    if (!stream_title || day_of_week == null || !start_time) {
+    // Sanitize user inputs
+    const safeStreamTitle = sanitize(stream_title);
+    const safeGameName = sanitize(game_name);
+    const safeGameCoverUrl = sanitize(game_cover_url);
+
+    if (!safeStreamTitle || day_of_week == null || !start_time) {
       return res.status(400).json({
         error: "stream_title, day_of_week et start_time sont obligatoires",
       });
@@ -125,7 +131,7 @@ router.put("/evenement/:eventId", requireAuth, async (req, res) => {
       `UPDATE evenement 
        SET stream_title = ?, day_of_week = ?, start_time = ?, end_time = ?, game_name = ?, game_cover_url = ?
        WHERE id_evenement = ?`,
-      [stream_title, dayNum, start_time, end_time || null, game_name || null, game_cover_url || null, eventId]
+      [safeStreamTitle, dayNum, start_time, end_time || null, safeGameName || null, safeGameCoverUrl || null, eventId]
     );
 
     return res.json({ message: "Événement modifié", id_evenement: eventId });
@@ -149,7 +155,12 @@ router.post("/:id/evenement",  requireAuth, async (req, res) => {
 
     const { stream_title, day_of_week, start_time, end_time, game_name, game_cover_url } = req.body;
 
-    if (!stream_title || day_of_week == null || !start_time) {
+    // Sanitize user inputs
+    const safeStreamTitle = sanitize(stream_title);
+    const safeGameName = sanitize(game_name);
+    const safeGameCoverUrl = sanitize(game_cover_url);
+
+    if (!safeStreamTitle || day_of_week == null || !start_time) {
       return res.status(400).json({
         error: "stream_title, day_of_week et start_time sont obligatoires",
       });
@@ -173,7 +184,7 @@ router.post("/:id/evenement",  requireAuth, async (req, res) => {
     const [result] = await db.execute(
       `INSERT INTO evenement (planning_id, stream_title, day_of_week, start_time, end_time, game_name, game_cover_url)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [planningId, stream_title, dayNum, start_time, end_time || null, game_name || null, game_cover_url || null]
+      [planningId, safeStreamTitle, dayNum, start_time, end_time || null, safeGameName || null, safeGameCoverUrl || null]
     );
 
     return res.json({
@@ -201,7 +212,10 @@ router.post("/",  requireAuth, async (req, res) => {
 
     const { title, start_date } = req.body;
 
-    if (!title || !start_date) {
+    // Sanitize user inputs
+    const safeTitle = sanitize(title);
+
+    if (!safeTitle || !start_date) {
       return res.status(400).json({ error: "title et start_date sont obligatoires" });
     }
 
@@ -221,7 +235,7 @@ router.post("/",  requireAuth, async (req, res) => {
     const [result] = await db.execute(
       `INSERT INTO Planning (title, user_id, start_date, end_date, created_at)
        VALUES (?, ?, ?, ?, ?)`,
-      [title, userId, forcedStart, forcedEnd, createdAt]
+      [safeTitle, userId, forcedStart, forcedEnd, createdAt]
     );
 
     const planningId = result.insertId;

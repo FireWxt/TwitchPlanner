@@ -5,6 +5,7 @@ const db = require("../dataBase/db");
 const { generateToken } = require("../middleware/token.js");
 const { requireAuth } = require("../middleware/authMiddleware.js");
 const { requireNonce } = require("../middleware/nonce.js");
+const { sanitize } = require("../utils/sanitize.js");
 
 const router = express.Router();
 
@@ -33,8 +34,11 @@ router.post("/register", async (req, res) => {
   try {
     const { email, password, twitch_url } = req.body;
 
+    // Sanitize user inputs (not password - it needs to match exactly)
+    const safeEmail = sanitize(email);
+    const safeTwitchUrl = sanitize(twitch_url);
 
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(safeEmail)) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
 
@@ -44,7 +48,7 @@ router.post("/register", async (req, res) => {
 
     const [existing] = await db.execute(
       "SELECT Id_USER FROM USER_ WHERE email = ? LIMIT 1",
-      [email]
+      [safeEmail]
     );
 
     if (existing.length > 0) {
@@ -60,13 +64,13 @@ router.post("/register", async (req, res) => {
     const [result] = await db.execute(
       `INSERT INTO USER_ (email, password, salt, twitch_url, avatar_url, created_at)
       VALUES (?, ?, ?, ?, ?, NOW())`,
-      [email, passwordHash, salt, twitch_url || null, defaultAvatar]
+      [safeEmail, passwordHash, salt, safeTwitchUrl || null, defaultAvatar]
     );
 
     return res.status(201).json({
       message: "Utilisateur créé avec succès",
       userId: result.insertId,
-      email
+      email: safeEmail
     });
 
   } catch (error) {
@@ -79,10 +83,13 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log("LOGIN req.body:", req.body);
-    console.log("EMAIL reçu:", email, "| type:", typeof email);
+    // Sanitize user inputs (not password - it needs to match exactly)
+    const safeEmail = sanitize(email);
 
-    if (!isValidEmail(email)) {
+    console.log("LOGIN req.body:", req.body);
+    console.log("EMAIL reçu:", safeEmail, "| type:", typeof safeEmail);
+
+    if (!isValidEmail(safeEmail)) {
       return res.status(400).json({ error: "Email invalide" });
     }
     if (typeof password !== "string" || password.length === 0) {
@@ -93,7 +100,7 @@ router.post("/login", async (req, res) => {
       `SELECT Id_USER, email, password, salt, twitch_url, created_at
        FROM USER_
        WHERE email = ? LIMIT 1`,
-      [email]
+      [safeEmail]
     );
 
     if (!rows.length) {
