@@ -21,14 +21,13 @@ async function requireAuth(req, res, next) {
       return res.status(401).json({ error: "Invalid token: no user email" });
     }
 
-      console.log("Token valid for user:", userMail);
+     
       const [rows] = await db.execute(
       `SELECT Id_USER, email, twitch_url, created_at
       FROM user_
       WHERE email = ? LIMIT 1`,
       [userMail]
-    );
-    console.log("Database query result:", rows);
+    );  
 
     if (!rows.length) {
       return res.status(401).json({ error: "Utilisateur introuvable (requireAuth)" });
