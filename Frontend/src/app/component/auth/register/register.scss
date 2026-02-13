@@ -84,6 +84,7 @@ input {
   }
 }
 
+
 .error {
   color: $error-color;
   font-size: 12px;
@@ -127,6 +128,7 @@ input {
   }
 }
 
+
 .footer {
   margin-top: 24px;
   display: flex;
@@ -146,5 +148,112 @@ input {
       color: $text-white;
       text-decoration: underline;
     }
+  }
+}
+
+ /* ============================= */
+/* IGDB SEARCH DROPDOWN (3 cols) */
+/* ============================= */
+
+.gameSearchWrapper {
+  position: relative;
+}
+
+/* On laisse l'input standard, mais si tu veux il prendra 100% */
+.gameSearchWrapper input {
+  width: 100%;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+
+  /* on agrandit la popup */
+  width: 640px;
+  max-width: 90vw;
+
+  margin-top: 8px;
+
+  background: rgba(42, 8, 69, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid $border-color;
+  border-radius: 14px;
+
+  /* scroll interne */
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 999;
+
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
+
+  /* ✅ grille 3 colonnes */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+}
+
+/* card de jeu */
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid $border-color;
+
+  background: rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
+
+  min-width: 0;
+
+  &:hover {
+    background: rgba(145, 70, 255, 0.14);
+    border-color: rgba(145, 70, 255, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.dropdownCover {
+  width: 32px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid $border-color;
+  flex: 0 0 auto;
+}
+
+.dropdownItem span {
+  font-size: 12px;
+  color: $text-light;
+  font-family: $alt-font;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* scrollbar */
+.dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+
+.dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(145, 70, 255, 0.25);
+}
+
+/* Responsive : si écran petit => 2 colonnes */
+@media (max-width: 560px) {
+  .dropdown {
+    width: 92vw;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

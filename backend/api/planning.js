@@ -85,6 +85,57 @@ router.delete("/evenement/:eventId", requireAuth, async (req, res) => {
 });
 
 /**
+ * PUT /api/planning/evenement/:eventId
+ * Modifie un événement (si l'événement appartient à un planning du user connecté)
+ */
+router.put("/evenement/:eventId", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.id ?? req.user?.Id_USER;
+    if (!userId) return res.status(401).json({ error: "Utilisateur non chargé (requireAuth)" });
+
+    const eventId = Number(req.params.eventId);
+    if (!Number.isFinite(eventId)) return res.status(400).json({ error: "Id événement invalide" });
+
+    const { stream_title, day_of_week, start_time, end_time, game_name, game_cover_url } = req.body;
+
+    if (!stream_title || day_of_week == null || !start_time) {
+      return res.status(400).json({
+        error: "stream_title, day_of_week et start_time sont obligatoires",
+      });
+    }
+
+    const dayNum = Number(day_of_week);
+    if (!Number.isFinite(dayNum) || dayNum < 1 || dayNum > 7) {
+      return res.status(400).json({ error: "day_of_week invalide (1-7)" });
+    }
+
+    // Vérifie que l'événement appartient au user
+    const [rows] = await db.execute(
+      `SELECT e.id_evenement
+       FROM evenement e
+       JOIN Planning p ON p.Id_Planning = e.planning_id
+       WHERE e.id_evenement = ? AND p.user_id = ?
+       LIMIT 1`,
+      [eventId, userId]
+    );
+
+    if (!rows.length) return res.status(404).json({ error: "Événement introuvable" });
+
+    await db.execute(
+      `UPDATE evenement 
+       SET stream_title = ?, day_of_week = ?, start_time = ?, end_time = ?, game_name = ?, game_cover_url = ?
+       WHERE id_evenement = ?`,
+      [stream_title, dayNum, start_time, end_time || null, game_name || null, game_cover_url || null, eventId]
+    );
+
+    return res.json({ message: "Événement modifié", id_evenement: eventId });
+  } catch (err) {
+    console.error("Update event error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
  * POST /api/planning/:id/evenement
  * Ajoute un événement à un planning (si il appartient au user)
  */
@@ -96,7 +147,7 @@ router.post("/:id/evenement",  requireAuth, async (req, res) => {
     const planningId = Number(req.params.id);
     if (!Number.isFinite(planningId)) return res.status(400).json({ error: "Id planning invalide" });
 
-    const { stream_title, day_of_week, start_time, end_time } = req.body;
+    const { stream_title, day_of_week, start_time, end_time, game_name, game_cover_url } = req.body;
 
     if (!stream_title || day_of_week == null || !start_time) {
       return res.status(400).json({
@@ -120,9 +171,9 @@ router.post("/:id/evenement",  requireAuth, async (req, res) => {
     if (!pRows.length) return res.status(403).json({ error: "Planning non autorisé" });
 
     const [result] = await db.execute(
-      `INSERT INTO evenement (planning_id, stream_title, day_of_week, start_time, end_time)
-       VALUES (?, ?, ?, ?, ?)`,
-      [planningId, stream_title, dayNum, start_time, end_time || null]
+      `INSERT INTO evenement (planning_id, stream_title, day_of_week, start_time, end_time, game_name, game_cover_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [planningId, stream_title, dayNum, start_time, end_time || null, game_name || null, game_cover_url || null]
     );
 
     return res.json({

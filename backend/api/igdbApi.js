@@ -39,7 +39,7 @@ router.post("/games/search", async (req, res) => {
       id: g.id,
       name: g.name,
       cover: g.cover
-        ? "https:" + g.cover.url.replace("t_thumb", "t_cover_big")
+        ? "https:" + g.cover.url.replace("t_thumb", "t_cover_small")
         : null,
     }));
 

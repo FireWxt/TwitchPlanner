@@ -39,6 +39,17 @@ export class PlanningService {
     return this.http.delete(`${this.API}/evenement/${eventId}`);
   }
 
+  updateEvenement(eventId: number, payload: {
+    stream_title: string;
+    day_of_week: number;
+    start_time: string;
+    end_time?: string | null;
+    game_name?: string | null;
+    game_cover_url?: string | null;
+  }) {
+    return this.http.put(`${this.API}/evenement/${eventId}`, payload);
+  }
+
   deletePlanning(planningId: number) {
     return this.http.delete(`${this.API}/${planningId}`);
   }
