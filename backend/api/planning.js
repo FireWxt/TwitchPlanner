@@ -15,7 +15,7 @@ function toYMD(d) {
 function mondayOfWeekFromYMD(ymd) {
   // ymd = "YYYY-MM-DD"
   const [y, m, d] = ymd.split("-").map(Number);
-  const date = new Date(y, m - 1, d); // ✅ évite les soucis UTC du new Date("YYYY-MM-DD")
+  const date = new Date(y, m - 1, d); 
   date.setHours(0, 0, 0, 0);
 
   const day = date.getDay(); // 0=Dim..6=Sam

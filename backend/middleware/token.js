@@ -101,7 +101,7 @@ async function verifyToken(tokenId, req) {
     valid: true,
     token: {
       id: tok.id,
-      user: tok.user_email, // ✅ important: requireAuth attend verification.token.user
+      user: tok.user_email,
       createdAt: Number(tok.created_at),
       expireAt: Number(tok.expire_at),
     },

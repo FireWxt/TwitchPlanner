@@ -17,7 +17,7 @@ function isValidEmail(email) {
 
 // Générer un salt sécurisé
 function generateSalt() {
-  return crypto.randomBytes(32).toString("hex"); // 64 chars
+  return crypto.randomBytes(32).toString("hex"); 
 }
 
 // Hash password + salt
@@ -28,7 +28,7 @@ function hashPassword(password, salt) {
     .digest("hex");
 }
 
-const defaultAvatar = "/uploads/avatars/default.png"; // Assurez-vous que ce fichier existe
+const defaultAvatar = "/uploads/avatars/default.png"; 
 
 router.post("/register", async (req, res) => {
   try {
@@ -79,7 +79,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", requireAuth, async (req, res) => {
   try {
     const { email, password } = req.body;
 

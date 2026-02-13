@@ -59,7 +59,7 @@ export class Profile implements OnInit {
           console.log('ME NEXT in component', data);
           this.me = data;
 
-          // ✅ préremplir
+        
           this.form.email = data.email ?? '';
           this.form.twitch_url = data.twitch_url ?? '';
           this.cdr.detectChanges();
