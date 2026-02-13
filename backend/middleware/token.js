@@ -91,6 +91,8 @@ async function verifyToken(tokenId, req) {
   }
 
   const currentFingerprint = generateDeviceFingerPrint(req);
+  console.log("VERIFY TOKEN - stored fingerprint:", tok.device_fingerprint);
+  console.log("VERIFY TOKEN - current fingerprint:", currentFingerprint);
   if (currentFingerprint !== tok.device_fingerprint) {
     return { valid: false, error: "Appareil non reconnu" };
   }

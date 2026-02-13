@@ -7,11 +7,17 @@ async function requireAuth(req, res, next) {
     const authHeader = req.headers.authorization;
     let tokenId = null;
 
+    console.log("AUTH MIDDLEWARE - authHeader:", authHeader);
+
     if (authHeader && authHeader.startsWith("Bearer ")) {
       tokenId = authHeader.substring(7);
     }
 
+    console.log("AUTH MIDDLEWARE - tokenId:", tokenId);
+
     const verification = await verifyToken(tokenId, req);
+    console.log("AUTH MIDDLEWARE - verification:", verification);
+    
     if (!verification.valid) {
       return res.status(401).json({ error: verification.error });
     }

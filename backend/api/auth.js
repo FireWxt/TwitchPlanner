@@ -27,6 +27,8 @@ function hashPassword(password, salt) {
     .digest("hex");
 }
 
+const defaultAvatar = "/uploads/avatars/default.png"; // Assurez-vous que ce fichier existe
+
 router.post("/register", async (req, res) => {
   try {
     const { email, password, twitch_url } = req.body;
@@ -56,9 +58,9 @@ router.post("/register", async (req, res) => {
     const passwordHash = hashPassword(password, salt);
 
     const [result] = await db.execute(
-      `INSERT INTO USER_ (email, password, salt, twitch_url, created_at)
-       VALUES (?, ?, ?, ?, NOW())`,
-      [email, passwordHash, salt, twitch_url || null]
+      `INSERT INTO USER_ (email, password, salt, twitch_url, avatar_url, created_at)
+      VALUES (?, ?, ?, ?, ?, NOW())`,
+      [email, passwordHash, salt, twitch_url || null, defaultAvatar]
     );
 
     return res.status(201).json({

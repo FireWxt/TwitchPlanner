@@ -18,6 +18,44 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // GET /api/profile/me
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    console.log("PROFILE /me - req.user:", req.user);
+    const [rows] = await db.execute(
+      `SELECT Id_USER, email, twitch_url, avatar_url, created_at
+       FROM USER_
+       WHERE Id_USER = ? LIMIT 1`,
+      [req.user.id]
+    );
+
+    console.log("PROFILE /me - rows:", rows);
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
+    }
+
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error("GET /api/profile/me error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// POST /api/profile/me/avatar
+router.post("/me/avatar", requireAuth, upload.single("avatar"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Fichier manquant" });
+
+  const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+  await db.execute(
+    `UPDATE USER_ SET avatar_url = ? WHERE Id_USER = ?`,
+    [avatarUrl, req.user.id]
+  );
+
+  return res.json({ avatar_url: avatarUrl });
+});
+
+// PUT /api/profile/me
 router.put("/me", requireAuth, async (req, res) => {
   const { email, twitch_url, avatar_url } = req.body;
 
@@ -56,21 +94,6 @@ router.put("/me", requireAuth, async (req, res) => {
   );
 
   return res.json(rows[0]);
-});
-
-
-// POST /api/profile/me/avatar
-router.post("/me/avatar", requireAuth, upload.single("avatar"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Fichier manquant" });
-
-  const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-
-  await db.execute(
-    `UPDATE USER_ SET avatar_url = ? WHERE Id_USER = ?`,
-    [avatarUrl, req.user.id]
-  );
-
-  return res.json({ avatar_url: avatarUrl });
 });
 
 
