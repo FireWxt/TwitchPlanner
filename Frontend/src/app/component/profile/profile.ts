@@ -9,6 +9,7 @@ import { UserService, MeResponse } from '../../services/user.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile.html',
+  styleUrls: ['./profile.scss']
 })
 export class Profile implements OnInit {
   me: MeResponse | null = null;

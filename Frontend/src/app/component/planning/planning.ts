@@ -13,6 +13,7 @@ type Day = { value: number; label: string };
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './planning.html',
+  styleUrls: ['./planning.scss']
 })
 export class Planning implements OnInit {
   @ViewChild('planningGrid') planningGrid!: ElementRef;

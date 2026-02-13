@@ -1,40 +1,44 @@
-<div class="container mt-5">
-  <h2>Créer un compte</h2>
+﻿<div class="page">
+  <div class="card">
+    <h1>Creer un compte</h1>
+    <p class="subtitle">Inscris-toi pour creer ton planning de stream</p>
 
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-    <!-- Email -->
-    <div class="mb-3">
-      <label>Email</label>
-      <input type="email" class="form-control" formControlName="email">
-      <small *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-        Email invalide
-      </small>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="ex: nom@domaine.com" autocomplete="email">
+        <small class="error" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          Email invalide
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="********" autocomplete="new-password">
+        <small class="error" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          Minimum 8 caracteres
+        </small>
+      </div>
+
+      <div class="field">
+        <label>URL chaine Twitch</label>
+        <input type="text" formControlName="twitch_url" placeholder="https://twitch.tv/ta_chaine">
+      </div>
+
+      <div class="errorBox" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button class="btn" type="submit" [disabled]="loading">
+        {{ loading ? 'Inscription...' : 'Sinscrire' }}
+      </button>
+
+    </form>
+
+    <div class="footer">
+      <span>Deja un compte ?</span>
+      <a routerLink="/login">Se connecter</a>
     </div>
-
-    <!-- Password -->
-    <div class="mb-3">
-      <label>Mot de passe</label>
-      <input type="password" class="form-control" formControlName="password">
-      <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-        Minimum 8 caractères
-      </small>
-    </div>
-
-    <!-- Twitch URL -->
-    <div class="mb-3">
-      <label>URL chaîne Twitch</label>
-      <input type="text" class="form-control" formControlName="twitch_url">
-    </div>
-
-
-    <div *ngIf="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
-    </div>
-
-    <button type="submit" class="btn btn-primary" [disabled]="loading">
-      {{ loading ? 'Inscription...' : 'S’inscrire' }}
-    </button>
-
-  </form>
+  </div>
 </div>

@@ -1,136 +1,92 @@
-<div style="max-width: 720px; margin: 24px auto; padding: 16px;">
-  <h2 style="margin: 0 0 12px;">Mon profil</h2>
+<div class="page">
+  <div class="container">
+    <h2>Mon profil</h2>
 
-  <!-- Loading -->
-  <div *ngIf="loading">Chargement…</div>
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">Chargement…</div>
 
-  <!-- Erreur -->
-  <div *ngIf="error" style="margin: 12px 0; color: #b00020;">
-    {{ error }}
-  </div>
+    <!-- Erreur -->
+    <div class="errorMsg" *ngIf="error">{{ error }}</div>
 
-  <!-- Succès -->
-  <div *ngIf="success" style="margin: 12px 0; color: #1b5e20;">
-    {{ success }}
-  </div>
+    <!-- Succès -->
+    <div class="successMsg" *ngIf="success">{{ success }}</div>
 
-  <!-- Contenu principal -->
-  <div *ngIf="me">
+    <!-- Contenu principal -->
+    <div *ngIf="me">
 
-    <!-- Bloc Avatar -->
-    <section style="border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px; margin: 14px 0;">
-      <h3 style="margin: 0 0 10px;">Avatar</h3>
+      <!-- Bloc Avatar -->
+      <section class="card">
+        <h3>Avatar</h3>
+        <div class="avatarSection">
+          <div class="avatarPreview">
+            <img
+              *ngIf="avatarSrc() as src; else noAvatar"
+              [src]="src"
+              alt="Avatar"
+            />
+            <ng-template #noAvatar>
+              <span class="noAvatarText">Aucun avatar</span>
+            </ng-template>
+          </div>
 
-      <div style="display:flex; gap:16px; align-items:center; flex-wrap: wrap;">
-        <div style="width: 96px; height: 96px; border-radius: 999px; overflow: hidden; border: 1px solid #ddd; display:flex; align-items:center; justify-content:center;">
-          <img
-            *ngIf="avatarSrc() as src; else noAvatar"
-            [src]="src"
-            alt="Avatar"
-            style="width: 100%; height: 100%; object-fit: cover;"
-          />
-          <ng-template #noAvatar>
-            <span style="font-size: 12px; color: #666;">Aucun avatar</span>
-          </ng-template>
+          <div class="avatarUpload">
+            <input
+              type="file"
+              name="avatarFile"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              [disabled]="uploading"
+            />
+            <div class="uploadingText" *ngIf="uploading">Upload…</div>
+          </div>
         </div>
+      </section>
 
-        <div>
-          <input
-            type="file"
-            name="avatarFile"
-            accept="image/*"
-            (change)="onFileSelected($event)"
-            [disabled]="uploading"
-          />
-          <div *ngIf="uploading" style="margin-top: 8px;">Upload…</div>
-        </div>
-      </div>
-    </section>
+      <!-- Bloc Informations -->
+      <section class="card">
+        <h3>Informations</h3>
+        <div class="formGrid">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" [(ngModel)]="form.email" />
+          </div>
 
-    <!-- Bloc Informations -->
-    <section style="border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px; margin: 14px 0;">
-      <h3 style="margin: 0 0 10px;">Informations</h3>
+          <div class="field">
+            <label>Twitch URL</label>
+            <input type="text" name="twitchUrl" [(ngModel)]="form.twitch_url" placeholder="https://twitch.tv/..." />
+          </div>
 
-      <div style="display:grid; grid-template-columns: 1fr; gap: 12px;">
-        <div>
-          <label style="display:block; font-weight:600; margin-bottom:6px;">Email</label>
-          <input
-            type="email"
-            name="email"
-            [(ngModel)]="form.email"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
-          />
-        </div>
-
-        <div>
-          <label style="display:block; font-weight:600; margin-bottom:6px;">Twitch URL</label>
-          <input
-            type="text"
-            name="twitchUrl"
-            [(ngModel)]="form.twitch_url"
-            placeholder="https://twitch.tv/..."
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
-          />
-        </div>
-
-        <div>
-          <button
-            type="button"
-            (click)="saveProfile()"
-            [disabled]="saving || uploading"
-            style="padding: 10px 14px; border-radius: 8px;">
+          <button class="btn primary" type="button" (click)="saveProfile()" [disabled]="saving || uploading">
             {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
           </button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Bloc Mot de passe -->
-    <section style="border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px; margin: 14px 0;">
-      <h3 style="margin: 0 0 10px;">Mot de passe</h3>
+      <!-- Bloc Mot de passe -->
+      <section class="card">
+        <h3>Mot de passe</h3>
+        <div class="formGrid">
+          <div class="field">
+            <label>Mot de passe actuel</label>
+            <input type="password" name="currentPassword" [(ngModel)]="pwd.currentPassword" />
+          </div>
 
-      <div style="display:grid; grid-template-columns: 1fr; gap: 12px;">
-        <div>
-          <label style="display:block; font-weight:600; margin-bottom:6px;">Mot de passe actuel</label>
-          <input
-            type="password"
-            name="currentPassword"
-            [(ngModel)]="pwd.currentPassword"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
-          />
-        </div>
+          <div class="field">
+            <label>Nouveau mot de passe</label>
+            <input type="password" name="newPassword" [(ngModel)]="pwd.newPassword" />
+          </div>
 
-        <div>
-          <label style="display:block; font-weight:600; margin-bottom:6px;">Nouveau mot de passe</label>
-          <input
-            type="password"
-            name="newPassword"
-            [(ngModel)]="pwd.newPassword"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
-          />
-        </div>
+          <div class="field">
+            <label>Confirmer nouveau mot de passe</label>
+            <input type="password" name="confirmNewPassword" [(ngModel)]="pwd.confirmNewPassword" />
+          </div>
 
-        <div>
-          <label style="display:block; font-weight:600; margin-bottom:6px;">Confirmer nouveau mot de passe</label>
-          <input
-            type="password"
-            name="confirmNewPassword"
-            [(ngModel)]="pwd.confirmNewPassword"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
-          />
-        </div>
-
-        <div>
-          <button
-            type="button"
-            (click)="changePassword()"
-            [disabled]="changingPwd"
-            style="padding: 10px 14px; border-radius: 8px;">
+          <button class="btn primary" type="button" (click)="changePassword()" [disabled]="changingPwd">
             {{ changingPwd ? 'Changement…' : 'Changer le mot de passe' }}
           </button>
         </div>
-      </div>
-    </section>
+      </section>
 
+    </div>
   </div>
 </div>

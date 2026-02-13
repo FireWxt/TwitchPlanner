@@ -1,0 +1,187 @@
+$font-main: 'Montserrat', sans-serif;
+$alt-font: 'Inclusive Sans', sans-serif;
+
+$primary: #9146ff;
+$primary-hover: #772ce8;
+$bg-gradient: linear-gradient(135deg, #6441a5, #2a0845);
+
+.hero {
+  height: 90vh;
+  background: $bg-gradient;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  font-family: $font-main;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero .logo {
+  width: 700px;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero p {
+  max-width: 600px;
+  margin: auto;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  font-family: $alt-font;
+  line-height: 1.6;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.9rem 1.8rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  font-family: $font-main;
+}
+
+.primary {
+  background: $primary;
+  color: white;
+
+  &:hover {
+    background: $primary-hover;
+    transform: translateY(-2px);
+  }
+}
+
+.secondary {
+  border: 2px solid white;
+  color: white;
+  background: transparent;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+.features {
+  padding: 5rem 2rem;
+  text-align: center;
+  background: #fafafa;
+  font-family: $font-main;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2a0845;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.feature-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.feature-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 14px;
+  width: 260px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(100, 65, 165, 0.1);
+  border: 1px solid rgba(100, 65, 165, 0.1);
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(100, 65, 165, 0.2);
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: #2a0845;
+  }
+
+  p {
+    font-family: $alt-font;
+    color: #666;
+    line-height: 1.5;
+  }
+}
+
+.how-it-works {
+  padding: 4rem 2rem;
+  background: white;
+  text-align: center;
+  font-family: $font-main;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2a0845;
+    margin-bottom: 1rem;
+  }
+}
+
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.step {
+  span {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $primary;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-family: $alt-font;
+    color: #444;
+  }
+}
+
+.final-cta {
+  padding: 5rem 2rem;
+  text-align: center;
+  background: $bg-gradient;
+  color: white;
+  font-family: $font-main;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.large {
+  font-size: 1.2rem;
+  padding: 1.1rem 2.5rem;
+}
