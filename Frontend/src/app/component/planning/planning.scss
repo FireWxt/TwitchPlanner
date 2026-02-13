@@ -133,3 +133,70 @@
   gap: 10px;
   margin-top: 12px;
 }
+
+.planningList {
+  margin-top: 24px;
+
+  h3 {
+    margin-bottom: 12px;
+    color: #333;
+  }
+}
+
+.planningItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #eaeaea;
+  }
+}
+
+.planningItemInfo {
+  flex: 1;
+}
+
+.planningItemTitle {
+  font-weight: 600;
+  color: #2f63b3;
+  margin-bottom: 4px;
+}
+
+.planningItemDates {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.planningItemActions {
+  display: flex;
+  gap: 8px;
+
+  button {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .btnDelete:hover {
+    background: rgba(220, 53, 69, 0.15);
+  }
+
+  .btnEdit:hover {
+    background: rgba(47, 99, 179, 0.15);
+  }
+}

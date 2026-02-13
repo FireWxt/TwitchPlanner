@@ -40,9 +40,15 @@
   <!-- LISTE DES PLANNINGS -->
   <div class="planningList" *ngIf="plannings.length > 0">
     <h3>Mes plannings</h3>
-    <div class="planningItem" *ngFor="let p of plannings" (click)="selectPlanning(p)">
-      <div class="planningItemTitle">{{ p.title }}</div>
-      <div class="planningItemDates">{{ formatPlanningRange(p.start_date, p.end_date) }}</div>
+    <div class="planningItem" *ngFor="let p of plannings">
+      <div class="planningItemInfo">
+        <div class="planningItemTitle">{{ p.title }}</div>
+        <div class="planningItemDates">{{ formatPlanningRange(p.start_date, p.end_date) }}</div>
+      </div>
+      <div class="planningItemActions">
+        <button class="btnEdit" (click)="selectPlanning(p)" title="Modifier">Modifier</button>
+        <button class="btnDelete" (click)="deletePlanningById(p.Id_Planning, $event)" title="Supprimer">Supprimer</button>
+      </div>
     </div>
   </div>
 

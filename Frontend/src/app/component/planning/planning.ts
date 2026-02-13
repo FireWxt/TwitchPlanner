@@ -379,7 +379,30 @@ export class Planning implements OnInit {
       next: () => {
         this.loading = false;
         this.cdr.detectChanges();
-        this.loadPlanning();
+        this.loadPlannings();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.handleHttpError(err, 'Erreur suppression planning');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  deletePlanningById(planningId: number, event: Event) {
+    event.stopPropagation();
+    
+    if (!confirm('Supprimer ce planning ?')) return;
+
+    this.error = null;
+    this.loading = true;
+    this.cdr.detectChanges();
+
+    this.planningService.deletePlanning(planningId).subscribe({
+      next: () => {
+        this.loading = false;
+        this.loadPlannings();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
