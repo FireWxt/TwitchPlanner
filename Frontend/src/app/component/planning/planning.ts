@@ -342,7 +342,8 @@ export class Planning implements OnInit {
           this.showEventForm = false;
           this.loading = false;
           this.cdr.detectChanges();
-          this.loadPlanning();
+          // Recharger le planning sélectionné
+          this.selectPlanning(this.planning);
         },
         error: (err) => {
           this.loading = false;
@@ -382,7 +383,8 @@ export class Planning implements OnInit {
       next: () => {
         this.loading = false;
         this.cdr.detectChanges();
-        this.loadPlanning();
+        // Recharger le planning sélectionné
+        this.selectPlanning(this.planning);
       },
       error: (err) => {
         this.loading = false;
