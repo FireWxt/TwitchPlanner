@@ -28,35 +28,16 @@ mysql -u root -p < bdd.sql
 
 Ou copiez-collez le contenu de `bdd.sql` dans MySQL Workbench / phpMyAdmin.
 
-### 3. Configurer les variables d'environnement du backend
 
-Créez un fichier `.env` dans le dossier `backend/` :
 
-```env
-# Base de données MySQL
-DB_HOST=localhost
-DB_USER=planneurUser
-DB_PASSWORD=2zCdaqat_x2FphM.
-DB_NAME=twitchplanner
-
-# Twitch / IGDB API (pour la recherche de jeux)
-TWITCH_CLIENT_ID=votre_client_id
-TWITCH_CLIENT_SECRET=votre_client_secret
-
-# Port du serveur
-PORT=3000
-```
-
-> Pour obtenir les credentials Twitch/IGDB, créez une application sur [Twitch Developer Console](https://dev.twitch.tv/console).
-
-### 4. Installer les dépendances du backend
+### 3. Installer les dépendances du backend
 
 ```bash
 cd backend
 npm install
 ```
 
-### 5. Installer les dépendances du frontend
+### 4. Installer les dépendances du frontend
 
 ```bash
 cd ../Frontend
