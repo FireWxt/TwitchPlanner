@@ -18,7 +18,7 @@
   </div>
 
   <div class="right">
-    <div class="logo">Logo</div>
+    <button class="downloadBtn" (click)="downloadPlanning()" title="Télécharger">💾 Télécharger</button>
     <div class="avatar">👤</div>
   </div>
 </div>
@@ -61,7 +61,7 @@
 <div *ngIf="loading" class="loading">Chargement...</div>
 
 <!-- GRILLE (Lun→Dim) -->
-<div class="weekGrid" *ngIf="planning">
+<div class="weekGrid" *ngIf="planning" #planningGrid>
   <div class="dayCol" *ngFor="let d of days">
 
     <div class="dayHeader">{{ d.label }}</div>

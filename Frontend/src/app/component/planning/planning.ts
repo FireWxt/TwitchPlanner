@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { PlanningService } from '../../services/planning.service';
 import { AuthService } from '../../services/auth.service';
+import html2canvas from 'html2canvas';
 
 type Day = { value: number; label: string };
 
@@ -14,6 +15,8 @@ type Day = { value: number; label: string };
   templateUrl: './planning.html',
 })
 export class Planning implements OnInit {
+  @ViewChild('planningGrid') planningGrid!: ElementRef;
+
   loading = false;
   error: string | null = null;
 
@@ -215,6 +218,26 @@ export class Planning implements OnInit {
     this.evenements = [];
     this.initEmptyEventsByDay();
     this.cdr.detectChanges();
+  }
+
+  async downloadPlanning() {
+    if (!this.planningGrid?.nativeElement) return;
+
+    try {
+      const canvas = await html2canvas(this.planningGrid.nativeElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      });
+
+      const link = document.createElement('a');
+      link.download = `planning-${this.planning?.title || 'stream'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Erreur téléchargement planning:', err);
+      this.error = 'Erreur lors du téléchargement';
+      this.cdr.detectChanges();
+    }
   }
 
   loadPlanning() {
