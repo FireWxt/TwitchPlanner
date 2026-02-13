@@ -6,6 +6,10 @@ import { PlanningService } from '../../services/planning.service';
 import { AuthService } from '../../services/auth.service';
 import html2canvas from 'html2canvas';
 
+import { Subject, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { IgdbService, IgdbGame } from '../../services/igdb.service';
+
 type Day = { value: number; label: string };
 
 @Component({
@@ -23,7 +27,7 @@ export class Planning implements OnInit {
 
   planning: any = null;
   evenements: any[] = [];
-  plannings: any[] = [];  // Liste de tous les plannings
+  plannings: any[] = []; // Liste de tous les plannings
 
   days: Day[] = [
     { value: 1, label: 'Lundi' },
@@ -37,9 +41,15 @@ export class Planning implements OnInit {
 
   eventsByDay: Record<number, any[]> = {};
   showEventForm = false;
-
+  editingEventId: number | null = null;
 
   minStartDate = '';
+
+  // IGDB autocomplete
+  private gameSearch$ = new Subject<string>();
+  gameResults: IgdbGame[] = [];
+  showGameDropdown = false;
+  isSearchingGames = false;
 
   // Form planning
   planningForm = {
@@ -48,24 +58,35 @@ export class Planning implements OnInit {
     end_date: '',
   };
 
-  // Form event (day_of_week = 1..7)
+  // Form event (day_of_week = 1..7) + IGDB
   eventForm: {
     stream_title: string;
     day_of_week: number | null;
     start_time: string;
     end_time: string;
+
+    game_query: string;
+    game_igdb_id: number | null;
+    game_name: string;
+    game_cover_url: string | null;
   } = {
     stream_title: '',
     day_of_week: null,
     start_time: '',
     end_time: '',
+
+    game_query: '',
+    game_igdb_id: null,
+    game_name: '',
+    game_cover_url: null,
   };
 
   constructor(
     private planningService: PlanningService,
     private auth: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private igdbService: IgdbService
   ) {}
 
   ngOnInit(): void {
@@ -79,8 +100,35 @@ export class Planning implements OnInit {
 
     this.initEmptyEventsByDay();
     this.loadPlannings();
-  }
 
+    // IGDB: abonnement recherche (debounce)
+    this.gameSearch$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((q) => {
+          const query = (q || '').trim();
+          if (query.length < 2) {
+            this.gameResults = [];
+            this.showGameDropdown = false;
+            this.isSearchingGames = false;
+            this.cdr.detectChanges();
+            return of([]);
+          }
+          this.isSearchingGames = true;
+          this.cdr.detectChanges();
+          return this.igdbService.searchGames(query).pipe(
+            catchError(() => of([]))
+          );
+        })
+      )
+      .subscribe((games) => {
+        this.isSearchingGames = false;
+        this.gameResults = games;
+        this.showGameDropdown = games.length > 0;
+        this.cdr.detectChanges();
+      });
+  }
 
   private getMondayOfCurrentWeekYMD(): string {
     const now = new Date();
@@ -155,15 +203,83 @@ export class Planning implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // ===== IGDB handlers =====
+
+  onGameInput(value: string) {
+    // l'utilisateur retape => on désélectionne le jeu
+    this.eventForm.game_query = value;
+    this.eventForm.game_igdb_id = null;
+    this.eventForm.game_name = '';
+    this.eventForm.game_cover_url = null;
+
+    this.gameSearch$.next(value);
+  }
+
+  selectGame(game: IgdbGame) {
+    this.eventForm.game_query = game.name;
+    this.eventForm.game_igdb_id = game.id;
+    this.eventForm.game_name = game.name;
+    this.eventForm.game_cover_url = game.cover;
+
+    this.showGameDropdown = false;
+    this.cdr.detectChanges();
+  }
+
+  hideGameDropdownSoon() {
+    setTimeout(() => {
+      this.showGameDropdown = false;
+      this.cdr.detectChanges();
+    }, 150);
+  }
+
+  // ===== UI event form =====
+
   openAddEvent(dayValue: number) {
     this.error = null;
+    this.editingEventId = null;
 
     this.eventForm = {
       stream_title: '',
       day_of_week: dayValue,
       start_time: '',
       end_time: '',
+
+      game_query: '',
+      game_igdb_id: null,
+      game_name: '',
+      game_cover_url: null,
     };
+
+    this.gameResults = [];
+    this.showGameDropdown = false;
+    this.isSearchingGames = false;
+
+    this.showEventForm = true;
+    this.cdr.detectChanges();
+  }
+
+  openEditEvent(event: any) {
+    this.error = null;
+    this.editingEventId = this.getEventId(event);
+
+    // Formater l'heure (enlever les secondes si présentes)
+    const formatTime = (t: string) => t ? t.substring(0, 5) : '';
+
+    this.eventForm = {
+      stream_title: event.stream_title || '',
+      day_of_week: event.day_of_week,
+      start_time: formatTime(event.start_time),
+      end_time: formatTime(event.end_time),
+
+      game_query: event.game_name || '',
+      game_igdb_id: event.game_igdb_id || null,
+      game_name: event.game_name || '',
+      game_cover_url: event.game_cover_url || null,
+    };
+
+    this.gameResults = [];
+    this.showGameDropdown = false;
+    this.isSearchingGames = false;
 
     this.showEventForm = true;
     this.cdr.detectChanges();
@@ -171,6 +287,7 @@ export class Planning implements OnInit {
 
   closeAddEvent() {
     this.showEventForm = false;
+    this.editingEventId = null;
     this.cdr.detectChanges();
   }
 
@@ -228,6 +345,9 @@ export class Planning implements OnInit {
       const canvas = await html2canvas(this.planningGrid.nativeElement, {
         backgroundColor: '#ffffff',
         scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
       });
 
       const link = document.createElement('a');
@@ -271,7 +391,6 @@ export class Planning implements OnInit {
       this.cdr.detectChanges();
       return;
     }
-
 
     const mondayThisWeek = this.minStartDate || this.getMondayOfCurrentWeekYMD();
     if (this.planningForm.start_date < mondayThisWeek) {
@@ -330,27 +449,34 @@ export class Planning implements OnInit {
     this.loading = true;
     this.cdr.detectChanges();
 
-    this.planningService
-      .addEvenement(this.planning.Id_Planning, {
-        stream_title: this.eventForm.stream_title,
-        day_of_week: day,
-        start_time: this.eventForm.start_time,
-        end_time: this.eventForm.end_time || null,
-      } as any)
-      .subscribe({
-        next: () => {
-          this.showEventForm = false;
-          this.loading = false;
-          this.cdr.detectChanges();
-          // Recharger le planning sélectionné
-          this.selectPlanning(this.planning);
-        },
-        error: (err) => {
-          this.loading = false;
-          this.handleHttpError(err, 'Erreur ajout événement');
-          this.cdr.detectChanges();
-        },
-      });
+    const payload = {
+      stream_title: this.eventForm.stream_title,
+      day_of_week: day,
+      start_time: this.eventForm.start_time,
+      end_time: this.eventForm.end_time || null,
+      game_igdb_id: this.eventForm.game_igdb_id,
+      game_name: this.eventForm.game_name,
+      game_cover_url: this.eventForm.game_cover_url,
+    };
+
+    const request$ = this.editingEventId
+      ? this.planningService.updateEvenement(this.editingEventId, payload as any)
+      : this.planningService.addEvenement(this.planning.Id_Planning, payload as any);
+
+    request$.subscribe({
+      next: () => {
+        this.showEventForm = false;
+        this.editingEventId = null;
+        this.loading = false;
+        this.cdr.detectChanges();
+        this.selectPlanning(this.planning);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.handleHttpError(err, this.editingEventId ? 'Erreur modification événement' : 'Erreur ajout événement');
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   formatPlanningRange(start: string, end: string): string {
@@ -417,7 +543,7 @@ export class Planning implements OnInit {
 
   deletePlanningById(planningId: number, event: Event) {
     event.stopPropagation();
-    
+
     if (!confirm('Supprimer ce planning ?')) return;
 
     this.error = null;

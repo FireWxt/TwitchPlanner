@@ -46,8 +46,8 @@
         <div class="planningItemDates">{{ formatPlanningRange(p.start_date, p.end_date) }}</div>
       </div>
       <div class="planningItemActions">
-        <button class="btnEdit" (click)="selectPlanning(p)" title="Modifier">Modifier</button>
-        <button class="btnDelete" (click)="deletePlanningById(p.Id_Planning, $event)" title="Supprimer">Supprimer</button>
+        <button class="btnEdit" (click)="selectPlanning(p)">Modifier</button>
+        <button class="btnDelete" (click)="deletePlanningById(p.Id_Planning, $event)">Supprimer</button>
       </div>
     </div>
   </div>
@@ -60,7 +60,7 @@
 <!-- CHARGEMENT -->
 <div *ngIf="loading" class="loading">Chargement...</div>
 
-<!-- GRILLE (Lun→Dim) -->
+<!-- GRILLE -->
 <div class="weekGrid" *ngIf="planning" #planningGrid>
   <div class="dayCol" *ngFor="let d of days">
 
@@ -70,13 +70,27 @@
 
     <!-- events -->
     <div class="eventCard" *ngFor="let ev of getEventsForDay(d.value)">
-      <div class="time">{{ ev.start_time }}</div>
-      <div class="name">{{ ev.stream_title }}</div>
+      
+      <!-- IMAGE DU JEU -->
+      <img *ngIf="ev.game_cover_url"
+           [src]="ev.game_cover_url"
+           class="eventCover" />
+      <div class="noEventCover" *ngIf="!ev.game_cover_url">🎮</div>
 
-      <button class="trash" (click)="deleteEvenement(getEventId(ev))">🗑</button>
+      <div class="eventOverlay">
+        <div class="time">{{ ev.start_time }}</div>
+        <div class="eventBottom">
+          <div class="title" *ngIf="ev.stream_title">{{ ev.stream_title }}</div>
+          <div class="gameName" *ngIf="ev.game_name">{{ ev.game_name }}</div>
+        </div>
+      </div>
+
+      <div class="eventActions">
+        <button class="editBtn" (click)="openEditEvent(ev)">✎</button>
+        <button class="trash" (click)="deleteEvenement(getEventId(ev))">✕</button>
+      </div>
     </div>
 
-    <!-- OFF si aucun event -->
     <div class="off" *ngIf="getEventsForDay(d.value).length === 0">
       OFF
     </div>
@@ -84,10 +98,10 @@
   </div>
 </div>
 
-<!-- MODAL AJOUT EVENT -->
+<!-- MODAL AJOUT/EDIT EVENT -->
 <div class="modalBackdrop" *ngIf="showEventForm">
   <div class="modal">
-    <h3>Ajouter un créneau</h3>
+    <h3>{{ editingEventId ? 'Modifier le créneau' : 'Ajouter un créneau' }}</h3>
 
     <label>Titre</label>
     <input [(ngModel)]="eventForm.stream_title" />
@@ -98,9 +112,51 @@
     <label>Heure fin</label>
     <input type="time" [(ngModel)]="eventForm.end_time" />
 
+    <!-- IGDB SEARCH -->
+    <label>Jeu</label>
+    <div class="gameSearchWrapper">
+
+      <input
+        [(ngModel)]="eventForm.game_query"
+        (input)="onGameInput($any($event.target).value)"
+        (blur)="hideGameDropdownSoon()"
+        placeholder="Rechercher un jeu..."
+        autocomplete="off"
+      />
+
+      <div class="loadingSmall" *ngIf="isSearchingGames">
+        Recherche...
+      </div>
+
+      <div class="dropdown" *ngIf="showGameDropdown">
+        <div class="gameGrid">
+          <div class="gameCard"
+               *ngFor="let g of gameResults"
+               (mousedown)="selectGame(g)">
+            
+            <img *ngIf="g.cover"
+                 [src]="g.cover"
+                 class="gameCover" />
+            <div class="noGameCover" *ngIf="!g.cover">?</div>
+
+            <span class="gameName">{{ g.name }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREVIEW SELECTION -->
+    <div class="selectedGame" *ngIf="eventForm.game_cover_url">
+      <img [src]="eventForm.game_cover_url" class="selectedCover" />
+      <div>{{ eventForm.game_name }}</div>
+    </div>
+
     <div class="actions">
-      <button (click)="addEvenement()">Ajouter</button>
+      <button (click)="addEvenement()">{{ editingEventId ? 'Modifier' : 'Ajouter' }}</button>
       <button (click)="closeAddEvent()">Annuler</button>
     </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
   </div>
 </div>
