@@ -12,6 +12,14 @@ export class PlanningService {
     return this.http.get<{ planning: any; evenements: any[] }>(`${this.API}/me`);
   }
 
+  getMyPlannings() {
+    return this.http.get<{ plannings: any[] }>(`${this.API}/list`);
+  }
+
+  getPlanningById(id: number) {
+    return this.http.get<{ planning: any; evenements: any[] }>(`${this.API}/${id}`);
+  }
+
   createPlanning(payload: { title: string; start_date: string; end_date?: string | null }) {
     return this.http.post(`${this.API}`, payload);
   }

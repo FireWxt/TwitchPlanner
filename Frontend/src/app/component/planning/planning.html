@@ -1,7 +1,8 @@
 <!-- HEADER -->
 <div class="planningHeader" *ngIf="planning">
   <div class="left">
-    <div class="title">Planning de stream</div>
+    <button class="backBtn" (click)="backToList()">← Retour</button>
+    <div class="title">{{ planning.title }}</div>
     <div class="range">
       {{ formatPlanningRange(planning.start_date, planning.end_date) }}
     </div>
@@ -13,7 +14,7 @@
   </div>
 </div>
 
-<!-- SI PAS DE PLANNING -->
+<!-- SI PAS DE PLANNING SELECTIONNE -->
 <div *ngIf="!planning && !loading" class="empty">
   <h2>Créer un planning</h2>
 
@@ -23,12 +24,26 @@
   <label>Début</label>
   <input type="date" [(ngModel)]="planningForm.start_date" [min]="minStartDate" />
 
-
-
   <button (click)="createPlanning()">Créer</button>
 
   <div class="error" *ngIf="error">{{ error }}</div>
+
+  <!-- LISTE DES PLANNINGS -->
+  <div class="planningList" *ngIf="plannings.length > 0">
+    <h3>Mes plannings</h3>
+    <div class="planningItem" *ngFor="let p of plannings" (click)="selectPlanning(p)">
+      <div class="planningItemTitle">{{ p.title }}</div>
+      <div class="planningItemDates">{{ formatPlanningRange(p.start_date, p.end_date) }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="plannings.length === 0" class="noPlannings">
+    Aucun planning pour le moment.
+  </div>
 </div>
+
+<!-- CHARGEMENT -->
+<div *ngIf="loading" class="loading">Chargement...</div>
 
 <!-- GRILLE (Lun→Dim) -->
 <div class="weekGrid" *ngIf="planning">

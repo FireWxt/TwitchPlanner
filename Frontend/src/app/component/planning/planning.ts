@@ -19,6 +19,7 @@ export class Planning implements OnInit {
 
   planning: any = null;
   evenements: any[] = [];
+  plannings: any[] = [];  // Liste de tous les plannings
 
   days: Day[] = [
     { value: 1, label: 'Lundi' },
@@ -33,7 +34,7 @@ export class Planning implements OnInit {
   eventsByDay: Record<number, any[]> = {};
   showEventForm = false;
 
-  // ✅ min date côté UI (lundi de la semaine en cours)
+
   minStartDate = '';
 
   // Form planning
@@ -70,14 +71,13 @@ export class Planning implements OnInit {
       return;
     }
 
-    // ✅ calcule une fois
     this.minStartDate = this.getMondayOfCurrentWeekYMD();
 
     this.initEmptyEventsByDay();
-    this.loadPlanning();
+    this.loadPlannings();
   }
 
-  // ✅ lundi de la semaine en cours au format YYYY-MM-DD
+
   private getMondayOfCurrentWeekYMD(): string {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -170,6 +170,53 @@ export class Planning implements OnInit {
     this.cdr.detectChanges();
   }
 
+  loadPlannings() {
+    this.loading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+
+    this.planningService.getMyPlannings().subscribe({
+      next: (res: any) => {
+        this.plannings = res?.plannings ?? [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.handleHttpError(err, 'Erreur chargement liste plannings');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  selectPlanning(p: any) {
+    this.loading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+
+    this.planningService.getPlanningById(p.Id_Planning).subscribe({
+      next: (res: any) => {
+        this.planning = res?.planning ?? null;
+        this.evenements = res?.evenements ?? [];
+        this.rebuildEventsByDay();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.handleHttpError(err, 'Erreur chargement planning');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  backToList() {
+    this.planning = null;
+    this.evenements = [];
+    this.initEmptyEventsByDay();
+    this.cdr.detectChanges();
+  }
+
   loadPlanning() {
     this.loading = true;
     this.error = null;
@@ -201,7 +248,7 @@ export class Planning implements OnInit {
       return;
     }
 
-    // ✅ BLOQUAGE FRONT : pas de semaine avant la semaine en cours
+
     const mondayThisWeek = this.minStartDate || this.getMondayOfCurrentWeekYMD();
     if (this.planningForm.start_date < mondayThisWeek) {
       this.error = `Impossible de créer un planning avant la semaine en cours (à partir du ${mondayThisWeek}).`;
@@ -223,7 +270,7 @@ export class Planning implements OnInit {
           this.planningForm = { title: '', start_date: '', end_date: '' };
           this.loading = false;
           this.cdr.detectChanges();
-          this.loadPlanning();
+          this.loadPlannings();
         },
         error: (err) => {
           this.loading = false;

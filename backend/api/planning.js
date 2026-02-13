@@ -214,8 +214,30 @@ router.get("/me", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * GET /api/planning/:id
+/** * GET /api/planning/list
+ * Retourne la liste de tous les plannings du user (sans les événements)
+ */
+router.get("/list", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.id ?? req.user?.Id_USER;
+    if (!userId) return res.status(401).json({ error: "Utilisateur non chargé (requireAuth)" });
+
+    const [plannings] = await db.execute(
+      `SELECT Id_Planning, title, start_date, end_date, created_at
+       FROM Planning
+       WHERE user_id = ?
+       ORDER BY start_date DESC`,
+      [userId]
+    );
+
+    return res.json({ plannings });
+  } catch (err) {
+    console.error("Get planning list error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+/** * GET /api/planning/:id
  * Récupère un planning par id (uniquement si c’est celui du user)
  */
 router.get("/:id", requireAuth, async (req, res) => {
