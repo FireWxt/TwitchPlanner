@@ -25,4 +25,13 @@ export class UserService {
     fd.append('avatar', file);
     return this.http.post<{ avatar_url: string }>(`${this.api}/me/avatar`, fd);
   }
+
+    updateMe(payload: { email: string; twitch_url?: string | null; avatar_url?: string | null }) {
+    return this.http.put<MeResponse>(`${this.api}/me`, payload);
+    }
+
+    changePassword(payload: { currentPassword: string; newPassword: string }) {
+    return this.http.put<{ ok: true }>(`${this.api}/me/password`, payload);
+    }
+
 }
