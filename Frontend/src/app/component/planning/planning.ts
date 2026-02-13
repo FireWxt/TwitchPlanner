@@ -488,14 +488,23 @@ export class Planning implements OnInit {
     const startDay = startDate.getDate();
     const endDay = endDate?.getDate();
 
-    const month = startDate.toLocaleDateString('fr-FR', { month: 'long' });
+    const startMonth = startDate.toLocaleDateString('fr-FR', { month: 'long' });
+    const endMonth = endDate?.toLocaleDateString('fr-FR', { month: 'long' });
     const year = startDate.getFullYear();
+    const endYear = endDate?.getFullYear();
 
     if (endDate) {
-      return `${startDay} → ${endDay} ${month} ${year}`;
+      // Si les mois sont différents
+      if (startMonth !== endMonth || year !== endYear) {
+        if (year !== endYear) {
+          return `${startDay} ${startMonth} ${year} → ${endDay} ${endMonth} ${endYear}`;
+        }
+        return `${startDay} ${startMonth} → ${endDay} ${endMonth} ${year}`;
+      }
+      return `${startDay} → ${endDay} ${startMonth} ${year}`;
     }
 
-    return `${startDay} ${month} ${year}`;
+    return `${startDay} ${startMonth} ${year}`;
   }
 
   deleteEvenement(eventId: number) {
