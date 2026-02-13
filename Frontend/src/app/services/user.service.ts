@@ -3,15 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface MeResponse {
-  id: number;
-  mail: string;
-  avatar_url: string | null;
+    Id_USER: number;
+    email: string;
+    twitch_url: string | null;
+    avatar_url: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   // adapte si ton backend tourne sur un autre port
-  private api = 'http://localhost:3000/api/users';
+  private api = 'http://localhost:3000/api/profile';
 
   constructor(private http: HttpClient) {}
 

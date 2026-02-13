@@ -23,7 +23,7 @@ async function requireAuth(req, res, next) {
 
      
       const [rows] = await db.execute(
-      `SELECT Id_USER, email, twitch_url, created_at
+      `SELECT Id_USER, email, twitch_url, created_at, avatar_url
       FROM user_
       WHERE email = ? LIMIT 1`,
       [userMail]
@@ -41,6 +41,7 @@ async function requireAuth(req, res, next) {
       email: u.email,
       twitch_url: u.twitch_url,
       created_at: u.created_at,
+      avartar_url: u.avatar_url,
     };
 
     return next();
